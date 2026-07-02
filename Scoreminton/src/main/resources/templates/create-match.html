@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scoreminton - Create Match</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-zinc-100 min-h-screen flex items-center justify-center font-sans sm:p-6">
+
+<div class="bg-white w-full sm:max-w-lg md:max-w-xl min-h-screen sm:min-h-[600px] sm:h-auto sm:rounded-3xl sm:shadow-2xl p-6 md:p-10 flex flex-col relative">
+
+    <div class="flex justify-between items-center mb-8 mt-2 md:mt-0">
+        <div>
+            <h1 class="text-3xl font-bold text-zinc-900 tracking-tight">New Match</h1>
+            <p class="text-sm text-zinc-500 italic">Configure your lineup</p>
+        </div>
+        <a href="/dashboard" class="text-sm font-semibold text-zinc-700 bg-zinc-100 px-4 py-2 rounded-full hover:bg-zinc-200 transition">
+            ← Cancel
+        </a>
+    </div>
+
+    <div th:if="${param.error != null}" class="bg-red-50 text-red-600 border border-red-200 text-sm font-bold px-4 py-3 rounded-xl mb-6">
+        <span th:if="${param.error[0] == 'sameTeam'}">You cannot select the same team twice!</span>
+        <span th:if="${param.error[0] == 'samePlayer'}">You cannot select the same player twice!</span>
+    </div>
+
+    <form action="/matches/create" method="POST" class="flex-grow flex flex-col">
+
+        <div class="flex justify-center mb-8">
+            <div class="bg-zinc-100 rounded-full p-1 inline-flex shadow-inner">
+                <button type="button" id="tab-single" onclick="switchTab('single')" class="px-6 py-2 rounded-full text-sm font-black tracking-wide uppercase transition-all bg-white shadow-sm text-zinc-900">Single</button>
+                <button type="button" id="tab-double" onclick="switchTab('double')" class="px-6 py-2 rounded-full text-sm font-bold tracking-wide uppercase transition-all text-zinc-400 hover:text-zinc-600">Double</button>
+            </div>
+        </div>
+
+        <input type="hidden" name="matchType" id="matchType" value="single">
+
+        <div id="single-section" class="space-y-6">
+            <div th:if="${#lists.isEmpty(players)}" class="text-center p-6 border-2 border-dashed border-zinc-200 rounded-xl">
+                <p class="text-sm font-bold text-zinc-400">No players created yet.</p>
+                <a href="/players/manage" class="text-xs text-blue-500 hover:underline mt-1 block">Go manage players</a>
+            </div>
+
+            <div th:if="${!#lists.isEmpty(players)}" class="space-y-6">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2">Player 1</label>
+                    <select name="playerOneId" class="w-full bg-zinc-50 border border-zinc-200 text-zinc-800 text-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:bg-white transition appearance-none">
+                        <option th:each="player : ${players}" th:value="${player.id}" th:text="${player.name}">Player A</option>
+                    </select>
+                </div>
+
+                <div class="flex justify-center items-center">
+                    <span class="text-lg font-black text-zinc-300 italic">VS</span>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2">Player 2</label>
+                    <select name="playerTwoId" class="w-full bg-zinc-50 border border-zinc-200 text-zinc-800 text-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:bg-white transition appearance-none">
+                        <option th:each="player : ${players}" th:value="${player.id}" th:text="${player.name}">Player B</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div id="double-section" class="space-y-6 hidden">
+            <div th:if="${#lists.isEmpty(teams)}" class="text-center p-6 border-2 border-dashed border-zinc-200 rounded-xl">
+                <p class="text-sm font-bold text-zinc-400">No teams created yet.</p>
+                <a href="/players/manage" class="text-xs text-blue-500 hover:underline mt-1 block">Go manage teams</a>
+            </div>
+
+            <div th:if="${!#lists.isEmpty(teams)}" class="space-y-6">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2">Team 1</label>
+                    <select name="teamOneId" class="w-full bg-zinc-50 border border-zinc-200 text-zinc-800 text-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:bg-white transition appearance-none">
+                        <option th:each="team : ${teams}" th:value="${team.id}" th:text="${team.teamName}">Team A</option>
+                    </select>
+                </div>
+
+                <div class="flex justify-center items-center">
+                    <span class="text-lg font-black text-zinc-300 italic">VS</span>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2">Team 2</label>
+                    <select name="teamTwoId" class="w-full bg-zinc-50 border border-zinc-200 text-zinc-800 text-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:bg-white transition appearance-none">
+                        <option th:each="team : ${teams}" th:value="${team.id}" th:text="${team.teamName}">Team B</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-10">
+            <button type="submit" th:disabled="${#lists.isEmpty(players)}" id="submitBtn" class="w-full bg-zinc-900 text-white font-medium py-4 rounded-xl text-center shadow-md hover:bg-zinc-800 transition duration-150 transform hover:scale-[1.01] flex items-center justify-center text-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                <svg class="w-5 h-5 mr-3 stroke-current" fill="none" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Start Match
+            </button>
+        </div>
+    </form>
+
+    <div class="text-center pt-8 mt-auto border-t border-zinc-100">
+        <span class="text-xs font-bold tracking-[0.4em] text-zinc-300 uppercase">Engine Initialization</span>
+    </div>
+
+</div>
+
+<script>
+    function switchTab(mode) {
+        const singleSec = document.getElementById('single-section');
+        const doubleSec = document.getElementById('double-section');
+        const tabSingle = document.getElementById('tab-single');
+        const tabDouble = document.getElementById('tab-double');
+        const matchTypeInput = document.getElementById('matchType');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // Check if lists are empty using a hack via DOM inspection (Checking if selects exist)
+        const hasPlayers = document.querySelector('select[name="playerOneId"]') !== null;
+        const hasTeams = document.querySelector('select[name="teamOneId"]') !== null;
+
+        if (mode === 'single') {
+            matchTypeInput.value = 'single';
+
+            // Show Single, Hide Double
+            singleSec.classList.remove('hidden');
+            doubleSec.classList.add('hidden');
+
+            // Style Tabs
+            tabSingle.classList.add('bg-white', 'shadow-sm', 'text-zinc-900', 'font-black');
+            tabSingle.classList.remove('text-zinc-400', 'hover:text-zinc-600', 'font-bold');
+
+            tabDouble.classList.remove('bg-white', 'shadow-sm', 'text-zinc-900', 'font-black');
+            tabDouble.classList.add('text-zinc-400', 'hover:text-zinc-600', 'font-bold');
+
+            submitBtn.disabled = !hasPlayers;
+        } else {
+            matchTypeInput.value = 'double';
+
+            // Show Double, Hide Single
+            doubleSec.classList.remove('hidden');
+            singleSec.classList.add('hidden');
+
+            // Style Tabs
+            tabDouble.classList.add('bg-white', 'shadow-sm', 'text-zinc-900', 'font-black');
+            tabDouble.classList.remove('text-zinc-400', 'hover:text-zinc-600', 'font-bold');
+
+            tabSingle.classList.remove('bg-white', 'shadow-sm', 'text-zinc-900', 'font-black');
+            tabSingle.classList.add('text-zinc-400', 'hover:text-zinc-600', 'font-bold');
+
+            submitBtn.disabled = !hasTeams;
+        }
+    }
+</script>
+
+</body>
+</html>

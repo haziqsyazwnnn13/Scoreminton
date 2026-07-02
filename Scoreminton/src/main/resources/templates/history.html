@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scoreminton - Match History</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-zinc-100 min-h-screen flex items-center justify-center font-sans sm:p-6">
+
+<div class="bg-white w-full sm:max-w-xl md:max-w-4xl min-h-screen sm:min-h-[720px] sm:h-auto sm:rounded-3xl sm:shadow-2xl p-6 md:p-10 flex flex-col relative">
+
+    <div class="flex justify-between items-center mb-8 mt-2 md:mt-0">
+        <div>
+            <h1 class="text-3xl font-bold text-zinc-900 tracking-tight">Match History</h1>
+            <p class="text-sm text-zinc-500 italic">Review past performances and layouts</p>
+        </div>
+        <a href="/dashboard" class="text-sm font-semibold text-zinc-700 bg-zinc-100 px-4 py-2 rounded-full hover:bg-zinc-200 transition">
+            ← Dashboard
+        </a>
+    </div>
+
+    <div class="flex-grow overflow-y-auto w-full pr-1">
+
+        <div th:if="${#lists.isEmpty(matches)}" class="h-96 flex flex-col items-center justify-center text-center border-2 border-dashed border-zinc-200 rounded-2xl p-6">
+            <p class="text-base font-bold text-zinc-400">No matches found in your ledger archive.</p>
+            <p class="text-xs text-zinc-400 max-w-xs mt-1">Go back to your dashboard panel and create a live configuration session to log database entities.</p>
+        </div>
+
+        <div th:if="${!#lists.isEmpty(matches)}" class="space-y-3">
+            <div th:each="match : ${matches}" class="bg-zinc-50 border border-zinc-200 rounded-2xl p-4 md:p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 shadow-sm hover:border-zinc-300 transition">
+
+                <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 items-center gap-4">
+                    <div class="flex items-center justify-between bg-white border border-zinc-200 rounded-xl px-4 py-3">
+                        <div class="flex flex-col">
+                            <span class="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-0.5">Team One</span>
+                            <span class="font-black text-zinc-900 text-sm md:text-base truncate max-w-[120px]" th:text="${match.teamOneName}">Team Alpha</span>
+                        </div>
+                        <span class="text-2xl font-black text-zinc-900 ml-4" th:text="${match.teamOneScore}">0</span>
+                    </div>
+
+                    <div class="flex items-center justify-between bg-white border border-zinc-200 rounded-xl px-4 py-3">
+                        <div class="flex flex-col">
+                            <span class="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-0.5">Team Two</span>
+                            <span class="font-black text-zinc-900 text-sm md:text-base truncate max-w-[120px]" th:text="${match.teamTwoName}">Team Beta</span>
+                        </div>
+                        <span class="text-2xl font-black text-zinc-900 ml-4" th:text="${match.teamTwoScore}">0</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between lg:justify-end lg:pl-4 lg:border-l border-zinc-200 gap-2 min-w-[150px]">
+
+                    <a th:href="@{/matches/history/{id}(id=${match.id})}" class="px-4 py-2 bg-zinc-900 text-white text-xs font-bold uppercase tracking-wider rounded-lg hover:bg-zinc-800 transition">
+                        Details
+                    </a>
+
+                    <form action="/matches/history/delete" method="POST" onsubmit="return confirm('Are you sure you want to delete this match history?');" class="m-0">
+                        <input type="hidden" name="matchId" th:value="${match.id}" />
+                        <button type="submit" class="px-4 py-2 bg-red-50 text-red-600 border border-red-100 text-xs font-bold uppercase tracking-wider rounded-lg hover:bg-red-100 transition">
+                            Delete
+                        </button>
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center pt-6 mt-auto border-t border-zinc-100">
+        <span class="text-xs font-bold tracking-[0.4em] text-zinc-300 uppercase">Scoreminton Archive Engine</span>
+    </div>
+</div>
+
+</body>
+</html>

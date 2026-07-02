@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scoreminton - Match Progression</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-zinc-100 min-h-screen flex items-center justify-center font-sans sm:p-6">
+
+<div class="bg-white w-full sm:max-w-3xl min-h-screen sm:min-h-[600px] sm:h-auto sm:rounded-3xl sm:shadow-2xl p-6 md:p-10 flex flex-col relative">
+
+    <div class="flex justify-between items-center mb-8 mt-2 md:mt-0">
+        <div>
+            <h1 class="text-3xl font-bold text-zinc-900 tracking-tight">Match Progression</h1>
+            <p class="text-sm text-zinc-500 italic">Point-by-point history timeline</p>
+        </div>
+        <a href="/matches/history" class="text-sm font-semibold text-zinc-700 bg-zinc-100 px-4 py-2 rounded-full hover:bg-zinc-200 transition">
+            ← Back
+        </a>
+    </div>
+
+    <div class="flex justify-center items-center gap-6 mb-6">
+        <div class="text-right">
+            <h3 class="text-sm font-bold uppercase text-zinc-400" th:text="${match.teamOneName}">Team 1</h3>
+            <p class="text-3xl font-black text-zinc-900" th:text="${match.teamOneScore}">0</p>
+        </div>
+        <span class="text-xl font-bold text-zinc-300">VS</span>
+        <div class="text-left">
+            <h3 class="text-sm font-bold uppercase text-zinc-400" th:text="${match.teamTwoName}">Team 2</h3>
+            <p class="text-3xl font-black text-zinc-900" th:text="${match.teamTwoScore}">0</p>
+        </div>
+    </div>
+
+    <div class="flex-grow flex flex-col items-center justify-center w-full min-h-[350px] bg-zinc-50 border border-zinc-200 rounded-2xl p-4 shadow-inner">
+        <canvas id="progressionChart"></canvas>
+    </div>
+
+    <div class="text-center pt-8 mt-6 border-t border-zinc-100">
+        <span class="text-xs font-bold tracking-[0.4em] text-zinc-300 uppercase">Scoreminton Timeline Analytics</span>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    const rawHistoryOne = /*[[${match.teamOneHistory}]]*/ '0';
+    const rawHistoryTwo = /*[[${match.teamTwoHistory}]]*/ '0';
+    const teamOneName = /*[[${match.teamOneName}]]*/ 'Team 1';
+    const teamTwoName = /*[[${match.teamTwoName}]]*/ 'Team 2';
+
+    const dataTeamOne = rawHistoryOne ? rawHistoryOne.split(',').map(Number) : [0];
+    const dataTeamTwo = rawHistoryTwo ? rawHistoryTwo.split(',').map(Number) : [0];
+
+    const totalPointsTracked = Math.max(dataTeamOne.length, dataTeamTwo.length);
+    const labels = Array.from({length: totalPointsTracked}, (_, i) => i === 0 ? 'Start' : 'Pt ' + i);
+
+    const ctx = document.getElementById('progressionChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: teamOneName,
+                    data: dataTeamOne,
+                    borderColor: '#18181b',
+                    backgroundColor: 'rgba(24, 24, 27, 0.05)',
+                    borderWidth: 3,
+                    tension: 0.2,
+                    pointRadius: 2,
+                    fill: true
+                },
+                {
+                    label: teamTwoName,
+                    data: dataTeamTwo,
+                    borderColor: '#a1a1aa',
+                    backgroundColor: 'rgba(161, 161, 170, 0.05)',
+                    borderWidth: 3,
+                    tension: 0.2,
+                    pointRadius: 2,
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: { font: { weight: 'bold' } }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1, color: '#71717a' },
+                    grid: { color: '#e4e4e7' }
+                },
+                x: {
+                    ticks: { maxTicksLimit: 12, color: '#71717a' },
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scoreminton - Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-200 min-h-screen flex items-center justify-center font-sans sm:p-6">
+
+<div class="bg-white w-full sm:max-w-md md:max-w-lg lg:max-w-xl min-h-screen sm:min-h-[600px] sm:h-auto sm:rounded-3xl sm:shadow-2xl p-8 md:p-12 flex flex-col items-center justify-center relative">
+
+    <h1 class="text-4xl md:text-5xl text-gray-800 mb-12 font-bold tracking-tight">Scoreminton</h1>
+
+    <div th:if="${error}" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6 text-center text-sm w-full max-w-sm">
+        <p th:text="${error}"></p>
+    </div>
+
+    <form action="/login" method="POST" class="w-full max-w-sm flex flex-col items-center gap-5">
+
+        <input type="text" name="username" placeholder="Username" required
+               class="w-full border border-gray-400 rounded-lg px-4 py-3 text-center focus:outline-none focus:ring-2 focus:ring-gray-600 transition">
+
+        <div class="w-full relative flex items-center justify-center">
+            <input type="password" name="password" placeholder="Password" required
+                   class="w-full border border-gray-400 rounded-lg px-4 py-3 text-center focus:outline-none focus:ring-2 focus:ring-gray-600 transition">
+            <svg class="w-6 h-6 text-gray-500 absolute right-3 cursor-pointer hover:text-gray-800 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+        </div>
+
+        <button type="submit"
+                class="mt-6 w-full md:w-3/4 bg-gray-700 text-white font-semibold py-3 px-8 rounded-lg shadow-md hover:bg-gray-800 transition duration-200 text-lg">
+            Login
+        </button>
+    </form>
+
+    <div class="mt-8 text-center text-sm md:text-base text-gray-600 flex flex-col gap-3">
+        <p>Don't have an account? <a href="/signup" class="font-semibold text-gray-800 hover:underline">Sign up</a></p>
+        <p><a href="/forgot-password" class="hover:underline">Forgot Password or Username?</a></p>
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,10 @@
+com\example\Scoreminton\repositories\TeamRepository.class
+com\example\Scoreminton\repositories\UserRepository.class
+com\example\Scoreminton\models\Player.class
+com\example\Scoreminton\controllers\WebController.class
+com\example\Scoreminton\models\User.class
+com\example\Scoreminton\repositories\PlayerRepository.class
+com\example\Scoreminton\repositories\MatchRepository.class
+com\example\Scoreminton\models\Team.class
+com\example\Scoreminton\models\Match.class
+com\example\Scoreminton\ScoremintonApplication.class

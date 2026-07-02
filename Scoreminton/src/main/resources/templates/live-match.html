@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Scoreminton - Live Court</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        html, body {
+            margin: 0; padding: 0; overflow: hidden;
+            height: 100%; height: -webkit-fill-available;
+            background-color: #f4f4f5;
+        }
+
+        #app-container {
+            width: 100vw; height: 100vh; height: 100dvh;
+            display: flex; flex-direction: column;
+        }
+
+        @media screen and (orientation: portrait) {
+            #app-container {
+                position: absolute;
+                top: 0; left: 0;
+                width: 100vh; width: 100dvh;
+                height: 100vw;
+                transform: rotate(90deg);
+                transform-origin: top left;
+                margin-left: 100vw;
+            }
+        }
+    </style>
+</head>
+<body class="font-sans text-zinc-900 select-none antialiased">
+
+<div id="app-container" onclick="requestFullScreenIfMobile()">
+
+    <div class="flex justify-between items-center px-4 py-2 bg-white border-b border-zinc-200 relative z-40">
+        <div class="flex items-center gap-3">
+            <button onclick="switchScreenSides(); event.stopPropagation();" class="text-xs font-bold bg-zinc-100 hover:bg-zinc-200 text-zinc-700 px-3 py-1.5 rounded border border-zinc-300 transition active:scale-95">
+                Swap Sides
+            </button>
+        </div>
+
+        <button onclick="resetMatchScore(); event.stopPropagation();" class="text-xs font-bold uppercase tracking-wider bg-zinc-100 hover:bg-red-50 text-zinc-500 hover:text-red-600 px-4 py-1.5 rounded border border-zinc-300 transition active:scale-95">
+            Reset Score
+        </button>
+
+        <form th:action="@{'/matches/live/' + ${match.id} + '/end'}" method="POST" class="m-0" onclick="event.stopPropagation();">
+            <button type="button" onclick="confirmEndMatch(this.form)" class="text-xs font-bold text-white bg-zinc-900 px-4 py-1.5 rounded border border-transparent hover:bg-zinc-800 transition">
+                End Match
+            </button>
+        </form>
+    </div>
+
+    <div id="court-grid" class="flex flex-row flex-grow w-full relative z-10 bg-zinc-100">
+
+        <div class="flex-1 flex flex-col relative w-full h-full border-r-[3px] border-zinc-400">
+
+            <div id="t1-left-box" class="flex-1 border-b-[3px] border-zinc-400 flex items-start justify-start p-4 transition-colors duration-300">
+                <span id="t1-left-name" class="bg-white/80 text-zinc-800 font-bold px-3 py-1.5 rounded border border-zinc-300 tracking-wide">P2</span>
+            </div>
+
+            <div class="absolute left-4 top-1/2 -translate-y-1/2 z-30 pointer-events-auto">
+                <button onclick="manualSwap(1); event.stopPropagation();" class="w-8 h-8 bg-white text-zinc-600 font-bold rounded-full border border-zinc-300 flex items-center justify-center shadow-sm active:scale-90 transition hover:bg-zinc-50" title="Swap Player Positions">
+                    ⇅
+                </button>
+            </div>
+
+            <div id="t1-right-box" class="flex-1 flex items-end justify-start p-4 transition-colors duration-300">
+                <span id="t1-right-name" class="bg-white/80 text-zinc-800 font-bold px-3 py-1.5 rounded border border-zinc-300 tracking-wide">P1</span>
+            </div>
+
+            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-20">
+                <h2 class="text-sm font-bold tracking-widest text-zinc-400 uppercase" th:text="${match.teamOneName}">Team 1</h2>
+                <div id="score1" class="text-[140px] font-black leading-none tracking-tighter text-zinc-900" th:text="${match.teamOneScore}">0</div>
+
+                <div class="flex gap-3 pointer-events-auto mt-2">
+                    <button onclick="updateScore(1, -1); event.stopPropagation();" class="w-12 h-12 bg-white text-zinc-500 rounded font-bold text-2xl hover:bg-zinc-50 active:scale-95 transition border border-zinc-300">-</button>
+                    <button onclick="updateScore(1, 1); event.stopPropagation();" class="w-28 h-12 bg-zinc-900 text-white rounded font-black text-sm uppercase tracking-wider hover:bg-zinc-800 active:scale-95 transition shadow-sm">+ Point</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex-1 flex flex-col relative w-full h-full">
+
+            <div id="t2-right-box" class="flex-1 border-b-[3px] border-zinc-400 flex items-start justify-end p-4 transition-colors duration-300">
+                <span id="t2-right-name" class="bg-white/80 text-zinc-800 font-bold px-3 py-1.5 rounded border border-zinc-300 tracking-wide">P1</span>
+            </div>
+
+            <div class="absolute right-4 top-1/2 -translate-y-1/2 z-30 pointer-events-auto">
+                <button onclick="manualSwap(2); event.stopPropagation();" class="w-8 h-8 bg-white text-zinc-600 font-bold rounded-full border border-zinc-300 flex items-center justify-center shadow-sm active:scale-90 transition hover:bg-zinc-50" title="Swap Player Positions">
+                    ⇅
+                </button>
+            </div>
+
+            <div id="t2-left-box" class="flex-1 flex items-end justify-end p-4 transition-colors duration-300">
+                <span id="t2-left-name" class="bg-white/80 text-zinc-800 font-bold px-3 py-1.5 rounded border border-zinc-300 tracking-wide">P2</span>
+            </div>
+
+            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-20">
+                <h2 class="text-sm font-bold tracking-widest text-zinc-400 uppercase" th:text="${match.teamTwoName}">Team 2</h2>
+                <div id="score2" class="text-[140px] font-black leading-none tracking-tighter text-zinc-900" th:text="${match.teamTwoScore}">0</div>
+
+                <div class="flex gap-3 pointer-events-auto mt-2">
+                    <button onclick="updateScore(2, -1); event.stopPropagation();" class="w-12 h-12 bg-white text-zinc-500 rounded font-bold text-2xl hover:bg-zinc-50 active:scale-95 transition border border-zinc-300">-</button>
+                    <button onclick="updateScore(2, 1); event.stopPropagation();" class="w-28 h-12 bg-zinc-900 text-white rounded font-black text-sm uppercase tracking-wider hover:bg-zinc-800 active:scale-95 transition shadow-sm">+ Point</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<input type="hidden" id="matchId" th:value="${match.id}">
+<input type="hidden" id="raw-t1-p1" th:value="${match.t1P1Name}">
+<input type="hidden" id="raw-t1-p2" th:value="${match.t1P2Name}">
+<input type="hidden" id="raw-t2-p1" th:value="${match.t2P1Name}">
+<input type="hidden" id="raw-t2-p2" th:value="${match.t2P2Name}">
+
+<script>
+    const matchId = document.getElementById("matchId").value;
+    let score1 = parseInt(document.getElementById("score1").innerText);
+    let score2 = parseInt(document.getElementById("score2").innerText);
+    let sidesSwapped = false;
+    let servingTeam = 0;
+
+    let t1_right = document.getElementById("raw-t1-p1").value;
+    let t1_left = document.getElementById("raw-t1-p2").value;
+    let t2_right = document.getElementById("raw-t2-p1").value;
+    let t2_left = document.getElementById("raw-t2-p2").value;
+
+    function renderNames() {
+        document.getElementById("t1-right-name").innerText = t1_right;
+        document.getElementById("t1-left-name").innerText = t1_left;
+        document.getElementById("t2-right-name").innerText = t2_right;
+        document.getElementById("t2-left-name").innerText = t2_left;
+    }
+
+    renderNames();
+    updateServeHighlights();
+
+    function requestFullScreenIfMobile() {
+        const docElm = document.documentElement;
+        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+            if (docElm.requestFullscreen) { docElm.requestFullscreen(); }
+            else if (docElm.webkitRequestFullscreen) { docElm.webkitRequestFullscreen(); }
+        }
+    }
+
+    function switchScreenSides() {
+        const courtGrid = document.getElementById("court-grid");
+        sidesSwapped = !sidesSwapped;
+        courtGrid.classList.toggle("flex-row-reverse", sidesSwapped);
+    }
+
+    function manualSwap(team) {
+        if (team === 1) {
+            let temp = t1_right; t1_right = t1_left; t1_left = temp;
+        } else {
+            let temp = t2_right; t2_right = t2_left; t2_left = temp;
+        }
+        renderNames();
+    }
+
+    function resetMatchScore() {
+        if (confirm("Reset current scores and serve orientations back to zero?")) {
+            score1 = 0;
+            score2 = 0;
+            servingTeam = 0;
+            document.getElementById("score1").innerText = "0";
+            document.getElementById("score2").innerText = "0";
+
+            t1_right = document.getElementById("raw-t1-p1").value;
+            t1_left = document.getElementById("raw-t1-p2").value;
+            t2_right = document.getElementById("raw-t2-p1").value;
+            t2_left = document.getElementById("raw-t2-p2").value;
+
+            renderNames();
+            updateServeHighlights();
+            syncScoreToBackend(1, 0, true);
+            syncScoreToBackend(2, 0, true);
+        }
+    }
+
+    function updateScore(teamNumber, change) {
+        if (change > 0) {
+            if (servingTeam === 0) {
+                servingTeam = teamNumber;
+            } else if (servingTeam === teamNumber) {
+                if (teamNumber === 1) {
+                    let temp = t1_right; t1_right = t1_left; t1_left = temp;
+                } else {
+                    let temp = t2_right; t2_right = t2_left; t2_left = temp;
+                }
+            } else {
+                servingTeam = teamNumber;
+            }
+        }
+
+        if (teamNumber === 1) {
+            score1 = Math.max(0, score1 + change);
+            document.getElementById("score1").innerText = score1;
+        } else {
+            score2 = Math.max(0, score2 + change);
+            document.getElementById("score2").innerText = score2;
+        }
+
+        renderNames();
+        updateServeHighlights();
+        syncScoreToBackend(teamNumber, change, false);
+    }
+
+    function updateServeHighlights() {
+        const activeClasses = ['bg-blue-50/60', 'ring-2', 'ring-blue-600', 'ring-inset'];
+
+        const t1Left = document.getElementById('t1-left-box');
+        const t1Right = document.getElementById('t1-right-box');
+        const t2Left = document.getElementById('t2-left-box');
+        const t2Right = document.getElementById('t2-right-box');
+
+        [t1Left, t1Right, t2Left, t2Right].forEach(b => b.classList.remove(...activeClasses));
+
+        if (score1 % 2 === 0) t1Right.classList.add(...activeClasses); else t1Left.classList.add(...activeClasses);
+        if (score2 % 2 === 0) t2Right.classList.add(...activeClasses); else t2Left.classList.add(...activeClasses);
+    }
+
+    function syncScoreToBackend(teamNumber, change, isReset) {
+        let formData = new URLSearchParams();
+        formData.append('team', teamNumber);
+        formData.append('change', isReset ? 0 : change);
+
+        fetch(`/matches/live/${matchId}/score`, {
+            method: 'POST', body: formData, headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        }).catch(error => console.error('Data Sync Warning:', error));
+    }
+
+    function confirmEndMatch(formElement) {
+        if(confirm("Are you sure you want to finalize and save this match layout?")) {
+            formElement.submit();
+        }
+    }
+</script>
+</body>
+</html>
